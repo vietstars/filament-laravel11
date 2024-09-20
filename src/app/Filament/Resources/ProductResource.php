@@ -9,6 +9,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+// use Illuminate\Database\Eloquent\Builder;
+use Filament\Support\RawJs;
 
 class ProductResource extends Resource
 {
@@ -20,8 +22,14 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name'),
-                Forms\Components\TextInput::make('price'),
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->unique(),
+                Forms\Components\TextInput::make('price')
+                    ->required()
+                    ->mask(RawJs::make('$money($input)'))
+                    ->stripCharacters(',')
+                    ->numeric(),
             ]);
     }
 
@@ -29,8 +37,21 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('price'),
+                Tables\Columns\TextColumn::make('name')
+                    ->sortable() 
+                    ->searchable(isIndividual: false, isGlobal: true),
+                    // ->searchable(query: function (Builder $query, string $search): Builder {
+                    //     return $query
+                    //         ->where('first_name', 'like', "%{$search}%")
+                    //         ->orWhere('last_name', 'like', "%{$search}%");
+                    // }),
+                Tables\Columns\TextColumn::make('price')
+                    ->sortable()
+                    ->label('Price - $')
+                    ->money('usd')
+                    ->getStateUsing(function (Product $record): float { 
+                        return $record->price / 100; 
+                    }), 
             ])
             ->filters([
                 //
