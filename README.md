@@ -25,34 +25,8 @@ composer require vietstars/logs-viewer
 
 ## Dev debugger
 ```cmd
-composer require vietstars/dev-debugger
+composer require barryvdh/laravel-debugbar
 ```
-
-## Sactum
-```cmd
-# build config and migragtion
-php artisan vendor:publish --provider=”Laravel\Sanctum\SanctumServiceProvider”
-```
-## Enable middleware
-```php
-# http\Kernel.php
-# api
-\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-```
-
-## Add api token to user model
-```php
-use Laravel\Sanctum\HasApiTokens; 
-```
-
-## Sign-in Flow
-![Login flow](./img/email-2fa-login.svg)
-
-## Post relation
-![Login flow](./img/post-relation.svg)
-
-## Emarket-4u
-![Login flow](./img/emarket-4u.drawio.svg)
 
 ## RSA
 ```php
