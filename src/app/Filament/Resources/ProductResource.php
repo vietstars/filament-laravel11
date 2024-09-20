@@ -7,10 +7,10 @@ use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-// use Illuminate\Database\Eloquent\Builder;
 use Filament\Support\RawJs;
+use Filament\Tables;
+// use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Table;
 
 class ProductResource extends Resource
 {
@@ -30,6 +30,15 @@ class ProductResource extends Resource
                     ->mask(RawJs::make('$money($input)'))
                     ->stripCharacters(',')
                     ->numeric(),
+                Forms\Components\Radio::make('status')
+                    ->options([
+                        'in stock' => 'in stock',
+                        'sold out' => 'sold out',
+                        'coming soon' => 'coming soon',
+                    ]),
+                Forms\Components\Select::make('category_id')
+                    ->relationship('category', 'name')
+                    ->searchable(),
             ]);
     }
 
@@ -38,7 +47,7 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->sortable() 
+                    ->sortable()
                     ->searchable(isIndividual: false, isGlobal: true),
                     // ->searchable(query: function (Builder $query, string $search): Builder {
                     //     return $query
@@ -47,11 +56,21 @@ class ProductResource extends Resource
                     // }),
                 Tables\Columns\TextColumn::make('price')
                     ->sortable()
-                    ->label('Price - $')
                     ->money('usd')
-                    ->getStateUsing(function (Product $record): float { 
-                        return $record->price / 100; 
-                    }), 
+                    ->getStateUsing(function (Product $record): float {
+                        return $record->price / 100;
+                    })
+                    ->alignEnd(),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'in stock' => 'primary',
+                        'sold out' => 'danger',
+                        'coming soon' => 'info',
+                        default => 'warning'
+                    }),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Category'),
             ])
             ->filters([
                 //

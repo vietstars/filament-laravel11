@@ -18,22 +18,22 @@ class EditProduct extends EditRecord
     }
 
     /**
-     * data /100 before fill input
+     * data /100 before fill input.
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data['price'] = $data['price'] / 100;
- 
+
         return $data;
     }
- 
+
     /**
-     * data *100 before save db
+     * data *100 before save db.
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['price'] = $data['price'] * 100;
- 
+
         return $data;
     }
 }

@@ -26,7 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'name',
         'email',
         'password',
-        'last_login_at'
+        'last_login_at',
     ];
 
     /**
