@@ -28,15 +28,21 @@ Mặc định là admin
 php artisan make:filament-user
 ```
  ┌ Name ────────────────────────────────────────────────────────┐
+
  │ vstars                                                       │
+
  └──────────────────────────────────────────────────────────────┘
 
  ┌ Email address ───────────────────────────────────────────────┐
+
  │ admin@gmail.com                                              │
+
  └──────────────────────────────────────────────────────────────┘
 
  ┌ Password ────────────────────────────────────────────────────┐
+
  │ ••••••••                                                     │
+
  └──────────────────────────────────────────────────────────────┘
 
 Sau khi đăng nhập xong:
@@ -106,4 +112,48 @@ return $panel
     ])
 ```
 
+## Caì dặt phân quyền:
+```cmd
+composer require spatie/laravel-permission
 
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+```
+
+```mysql
+INSERT INTO `roles` (`id`, `name`, `guard_name`) VALUES
+(1,'admin', 'web'),
+(2,'manager', 'web'),
+(3,'moderator', 'web'),
+(4,'supervisor', 'web'),
+(5,'user', 'web');
+
+INSERT INTO `user_roles` (`role_id`, `user_id`, `model_type`)
+VALUES
+    (1, 1, 'App\\Models\\User'),
+    (2, 2, 'App\\Models\\User');
+```
+
+Cập nhật Models\User
+```php
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable
+{
+    use HasRoles; 
+
+    public function roles()
+    {
+        return $this->morphToMany(
+            config('permission.models.role'),
+            'model',
+            config('permission.table_names.model_has_roles'),
+            config('permission.column_names.model_morph_key'),
+            'role_id'
+        );
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return $this->hasRole([Role::ADMIN, Role::MANAGER]);
+    }
+```
