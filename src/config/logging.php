@@ -1,11 +1,11 @@
 <?php
 
+use Monolog\Handler\FilterHandler;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
-use Monolog\Processor\PsrLogMessageProcessor;
-use Monolog\Handler\FilterHandler;
 use Monolog\Handler\TelegramBotHandler;
+use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
 
@@ -84,14 +84,16 @@ return [
             'replace_placeholders' => true,
         ],
 
-        "telegram" => [
+        'telegram' => [
             'driver'  => 'monolog',
             'handler' => FilterHandler::class,
             'level' => env('LOG_LEVEL', 'debug'),
             'with' => [
-                'handler' => new TelegramBotHandler($apiKey = env('TELEGRAM_API_KEY'), 
-                $channel = env('TELEGRAM_CHANNEL'))
-            ]
+                'handler' => new TelegramBotHandler(
+                    $apiKey = env('TELEGRAM_API_KEY'),
+                    $channel = env('TELEGRAM_CHANNEL')
+                ),
+            ],
         ],
 
         'papertrail' => [
@@ -99,9 +101,9 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => env('LOG_PAPERTRAIL_HANDLER', SyslogUdpHandler::class),
             'handler_with' => [
-                'host' => env('PAPERTRAIL_URL'),
-                'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                    'host' => env('PAPERTRAIL_URL'),
+                    'port' => env('PAPERTRAIL_PORT'),
+                    'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
@@ -112,7 +114,7 @@ return [
             'handler' => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'with' => [
-                'stream' => 'php://stderr',
+                    'stream' => 'php://stderr',
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
