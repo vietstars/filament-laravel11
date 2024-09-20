@@ -1,0 +1,38 @@
+language: php
+sudo: required
+php:
+- 8.2.20
+node_js:
+- '18.19.0'
+cache:
+  directories:
+  - "$HOME/.cache"
+  - "$HOME/.composer"
+  - "$HOME/.npm"
+  - "./vendor"
+services:
+- mysql
+
+env:
+- NAME=laravel11_filament  VERSION=0.0.1
+before_install:
+- mysql -e 'CREATE DATABASE laravel;'
+- echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+- npm install
+- npm run prod
+
+script:
+- composer check-style
+
+before_script:
+- cp -rf ./.env.example .env
+- COMPOSER_MEMORY_LIMIT=-1 composer --global config process-timeout 2000
+- COMPOSER_MEMORY_LIMIT=-1 composer install
+
+script:
+- composer check-style
+
+after_success:
+
+notifications:
+  slack: 
