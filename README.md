@@ -1,161 +1,133 @@
 # Nginx-Laravel11 - filament
 
-## Cài Filament
+## Tạo trang Product
+Tạo migration products
 ```cmd
-docker exec -it Laravel11-web /bin/sh -c "composer require filament/filament"
-
-composer require filament/filament
+php artisan make:migration create_products_table
 ```
-
-## Tài panel quản lý
-```cmd
-php artisan filament:install --panels
-```
-
-#### URL route mong muốn:
-http://dev.org/dashboard/login
-```cmd
- ┌ What is the ID? ─────────────────────────────────────────────┐
- │ dashboard                                                    │
- └──────────────────────────────────────────────────────────────┘
-```
-Mặc định là admin
-
-![Login panel](./img/login-panel.png)
-
-## Tạo user
-```cmd
-php artisan make:filament-user
-
- ┌ Name ────────────────────────────────────────────────────────┐
- │ vstars                                                       │
- └──────────────────────────────────────────────────────────────┘
-
- ┌ Email address ───────────────────────────────────────────────┐
- │ admin@gmail.com                                              │
- └──────────────────────────────────────────────────────────────┘
-
- ┌ Password ────────────────────────────────────────────────────┐
- │ ••••••••                                                     │
- └──────────────────────────────────────────────────────────────┘
-```
-
-Sau khi đăng nhập xong:
-
-![Login panel](./img/dashboard-panel.png)
-
-Chuyển môi trường để từ hạn chế cho phép vào dashboard
-
-```env
-APP_ENV=local 
-->
-APP_ENV=production 
-```
-
-## Tuỳ chỉnh cho panel
-
-app/Providers/Filament/AdminPanelProvider.php:
-
 ```php
-class AdminPanelProvider extends PanelProvider
-{
-    public function panel(Panel $panel): Panel
+    public function up(): void
     {
-        return $panel
-            ->default()
-            ->id('dashboard')
-            ->path('dashboard')
-            ->login()
-            ->colors([
-                'primary' => Color::Amber,
-            ])
-            // ... more settings
-            ->authMiddleware([
-                Authenticate::class,
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->integer('price');
+            $table->timestamps();
+        });
+    }
+```
+Tạo Model Product
+```cmd
+php artisan make:model Product
+```
+```php
+class Product extends Model
+{
+ 
+    protected $fillable = [
+        'name', 
+        'price'
+    ];
+```
+Triễn khai DB
+```cmd
+php artisan migrate
+```
+Tạo reource cho Product
+```cmd
+php artisan make:filament-resource Product
+```
+Thành công:
+![Product option](./img/product-option.png)
+
+Resource của Product chứa trong: 
+```cmd
+app/Filament/Resources/ProductResource
+```
+![Product option](./img/product-resource.png)
+
+#### Chức năng
+1.  CreateProduct
+2.  EditProduct
+3.  ListProduct
+
+#### Resource
+-   ProductResource
+
+### Tạo Form để nhập Product và xuất columns product ra table
+```php
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+
+class ProductResource extends Resource
+{
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('name'),
+                Forms\Components\TextInput::make('price'),
             ]);
     }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('name'), 
+                Tables\Columns\TextColumn::make('price'),
+            ]);
+    }
+```
+Product form create/update
+![Product option](./img/product-create.png)
+![Product option](./img/product-update.png)
+Product column on list
+![Product option](./img/product-list.png)
+Product column on list bulk action
+![Product option](./img/product-bulkactions.png)
+
+##### Đổi chuyển hướng sau khi create
+```cmd
+app/Filament/Resources/ProductResource/Pages/CreateProduct.php
+```
+```php
+class CreateProduct extends CreateRecord
+{
+    // ...
+    protected function getRedirectUrl(): string 
+    { 
+        return $this->getResource()::getUrl('index'); 
+    } 
 }
 ```
-
-Thay đổi:
-```php
-return $panel
-    ->path('dashboard') //đổi ở đây
-    ->path('admin') 
-```
-
-Thêm chức năng:
-```php
-return $panel
-    ->login() // thêm ở bên dưới
-    ->registration() 
-    ->passwordReset() 
-    ->emailVerification() 
-    ->profile()
-```
-
-Đổi màu:
-```php
-return $panel
-    ->colors([
-        'primary' => Color::Amber,
-        'danger' => Color::Red,
-        'gray' => Color::Zinc,
-        'info' => Color::Blue,
-        'success' => Color::Green,
-        'warning' => Color::Amber,
-    ])
-```
-
-## Caì dặt phân quyền:
+##### hoặc update
 ```cmd
-composer require spatie/laravel-permission
-
-php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+app/Filament/Resources/ProductResource/Pages/EditProduct.php
 ```
-Khai báo Provider: bootstrap\providers.php
 ```php
-return [
-    App\Providers\AppServiceProvider::class,
-    ...
-    Spatie\Permission\PermissionServiceProvider::class,
-];
-```
-```mysql
-INSERT INTO `roles` (`id`, `name`, `guard_name`) VALUES
-(1,'admin', 'web'),
-(2,'manager', 'web'),
-(3,'moderator', 'web'),
-(4,'supervisor', 'web'),
-(5,'user', 'web');
-
-INSERT INTO `user_roles` (`role_id`, `user_id`, `model_type`)
-VALUES
-    (1, 1, 'App\\Models\\User'),
-    (2, 2, 'App\\Models\\User');
-```
-
-Cập nhật Models\User
-```php
-use Spatie\Permission\Traits\HasRoles;
-
-class User extends Authenticatable
+class EditProduct extends EditRecord
 {
-    use HasRoles; 
-
-    public function roles()
+    // ...
+    protected function getRedirectUrl(): string 
+    { 
+        return $this->getResource()::getUrl('index'); 
+    } 
+}
+```
+##### Thêm chức năng delete trên list
+```php
+ public static function table(Table $table): Table
     {
-        return $this->morphToMany(
-            config('permission.models.role'),
-            'model',
-            config('permission.table_names.model_has_roles'),
-            config('permission.column_names.model_morph_key'),
-            'role_id'
-        );
-    }
-
-    public function getIsAdminAttribute()
-    {
-        return $this->hasRole([Role::ADMIN, Role::MANAGER]);
+        return $table
+            ...
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
     }
 ```
