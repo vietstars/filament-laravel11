@@ -1,133 +1,74 @@
 # Nginx-Laravel11 - filament
 
-## Tạo trang Product
-Tạo migration products
-```cmd
-php artisan make:migration create_products_table
-```
+## Thêm chức năng yêu cầu cho name và price
+Thêm rule là unique cho name (phát sinh lỗi nếu có soft_delete)
+Thêm rule số cho price
 ```php
-    public function up(): void
-    {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->integer('price');
-            $table->timestamps();
-        });
-    }
-```
-Tạo Model Product
-```cmd
-php artisan make:model Product
-```
-```php
-class Product extends Model
 {
- 
-    protected $fillable = [
-        'name', 
-        'price'
-    ];
+return $form
+    ->schema([
+        Forms\Components\TextInput::make('name')
+            ->required()
+            ->unique(),
+        Forms\Components\TextInput::make('price')
+            ->required()
+            ->rule('numeric'),
+    ])
 ```
-Triễn khai DB
-```cmd
-php artisan migrate
-```
-Tạo reource cho Product
-```cmd
-php artisan make:filament-resource Product
-```
-Thành công:
-![Product option](./img/product-option.png)
+1 vài rule trên laravel
+https://laravel.com/docs/10.x/validation#available-validation-rules
 
-Resource của Product chứa trong: 
-```cmd
-app/Filament/Resources/ProductResource
-```
-![Product option](./img/product-resource.png)
+## Thêm Sorting cho column trên table
+Thêm mặc định sort cho table theo price - desc
+Mở rộng chức năng search text cho columns name
 
-#### Chức năng
-1.  CreateProduct
-2.  EditProduct
-3.  ListProduct
-
-#### Resource
--   ProductResource
-
-### Tạo Form để nhập Product và xuất columns product ra table
 ```php
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-
-class ProductResource extends Resource
-{
-
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name'),
-                Forms\Components\TextInput::make('price'),
-            ]);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name'), 
-                Tables\Columns\TextColumn::make('price'),
-            ]);
-    }
+return $table
+    ->columns([
+        Tables\Columns\TextColumn::make('name')
+            ->sortable() // sorting cho name
+            ->searchable(isIndividual: false, isGlobal: true), // search cho name
+        Tables\Columns\TextColumn::make('price')
+            ->sortable() // sorting cho price
+            ->label('Price - $') // đổi label cho column
+            ->money('usd') // định dạng tiền
+            ->getStateUsing(function (Product $record): float { //State giá trị hiện tại của row trả về
+                return $record->price / 100; //giá trị price xuất ra bằng price hiện tại chia /100
+            }),
+    ])
+    ->defaultSort('price', 'desc') // mặc định sorting ủa table
 ```
-Product form create/update
-![Product option](./img/product-create.png)
-![Product option](./img/product-update.png)
-Product column on list
-![Product option](./img/product-list.png)
-Product column on list bulk action
-![Product option](./img/product-bulkactions.png)
 
-##### Đổi chuyển hướng sau khi create
-```cmd
-app/Filament/Resources/ProductResource/Pages/CreateProduct.php
-```
+## Chỉnh sửa dữ liệu trước khi lưu DB
+Create product
 ```php
 class CreateProduct extends CreateRecord
 {
-    // ...
-    protected function getRedirectUrl(): string 
-    { 
-        return $this->getResource()::getUrl('index'); 
-    } 
+    ....
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['price'] = $data['price'] * 100;
+
+        return $data;
+    }
 }
 ```
-##### hoặc update
-```cmd
-app/Filament/Resources/ProductResource/Pages/EditProduct.php
-```
+Update product
 ```php
 class EditProduct extends EditRecord
 {
-    // ...
-    protected function getRedirectUrl(): string 
-    { 
-        return $this->getResource()::getUrl('index'); 
-    } 
-}
-```
-##### Thêm chức năng delete trên list
-```php
- public static function table(Table $table): Table
+    ...
+    protected function mutateFormDataBeforeFill(array $data): array
     {
-        return $table
-            ...
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
+        $data['price'] = $data['price'] / 100;
+ 
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['price'] = $data['price'] * 100;
+ 
+        return $data;
     }
 ```
