@@ -4,20 +4,25 @@ namespace App\Common\Constants;
 
 class Role
 {
-    const ADMIN = 'admin';
-    const ADMIN_ID = 1;
+    public const ADMIN = 'admin';
 
-    const MANAGER = 'manager';
-    const MANAGER_ID = 2;
+    public const ADMIN_ID = 1;
 
-    const MOD = 'moderator';
-    const MOD_ID = 3;
+    public const MANAGER = 'manager';
 
-    const SUPER = 'supervisor';
-    const SUPER_ID = 4;
+    public const MANAGER_ID = 2;
 
-    const USER = 'user';
-    const USER_ID = 5;
+    public const MOD = 'moderator';
 
-    const MODEL_USER = 'App\Models\User';
+    public const MOD_ID = 3;
+
+    public const SUPER = 'supervisor';
+
+    public const SUPER_ID = 4;
+
+    public const USER = 'user';
+
+    public const USER_ID = 5;
+
+    public const MODEL_USER = 'App\Models\User';
 }

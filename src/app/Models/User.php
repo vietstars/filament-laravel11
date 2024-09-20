@@ -3,18 +3,18 @@
 namespace App\Models;
 
 use App\Common\Constants\Role;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Filament\Models\Contracts\FilamentUser;
 use Spatie\Permission\Traits\HasRoles;
-use Filament\Panel;
 
 class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 {
-    use HasFactory, 
-        Notifiable, 
+    use HasFactory,
+        Notifiable,
         HasRoles;
 
     /**
@@ -84,11 +84,11 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         return $this->hasRole([Role::SUPER, Role::USER]);
     }
 
-    /**  
-     * set role can access panel
-     * 
+    /**
+     * set role can access panel.
+     *
      * @return bool
-    */
+     */
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_admin == 1;
@@ -96,8 +96,8 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     }
 
     /**
-     * get user roles 
-     * 
+     * get user roles.
+     *
      * @author vstars
      */
     public function getRoleAttribute()
