@@ -113,7 +113,14 @@ composer require spatie/laravel-permission
 
 php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
 ```
-
+Khai báo Provider: bootstrap\providers.php
+```php
+return [
+    App\Providers\AppServiceProvider::class,
+    ...
+    Spatie\Permission\PermissionServiceProvider::class,
+];
+```
 ```mysql
 INSERT INTO `roles` (`id`, `name`, `guard_name`) VALUES
 (1,'admin', 'web'),
