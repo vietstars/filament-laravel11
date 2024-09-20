@@ -2,16 +2,17 @@
 
 namespace App\Listeners;
 
-use Illuminate\Auth\Events\Login;
 use App\Models\User;
+use Illuminate\Auth\Events\Login;
 
-class UpdateLastLoginAt { 
-
-    /** 
-     * Create the event listener. 
-    */ 
-    public function __construct() { 
-        // 
+class UpdateLastLoginAt
+{
+    /**
+     * Create the event listener.
+     */
+    public function __construct()
+    {
+        //
     }
 
     /**
@@ -26,5 +27,4 @@ class UpdateLastLoginAt {
             $user->save();
         }
     }
-
 }
