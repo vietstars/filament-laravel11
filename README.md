@@ -1,5 +1,11 @@
 # Nginx-Laravel10
 
+## docker fix-M chip
+```cmd
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+export DOCKER_DEFAULT_PLATFORM=linux/arm64
+```
+
 ## docker
 ```cmd
 docker compose exec php /bin/sh -c "composer intall && chmod -R 777 storage && php artisan key:geneate" 
