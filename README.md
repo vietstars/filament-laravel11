@@ -131,3 +131,55 @@ class EditProduct extends EditRecord
             ])
     }
 ```
+
+```php
+<div class="fi-input-wrp flex rounded-lg shadow-sm ring-1 transition duration-75 bg-white dark:bg-white/5 [&:not(:has(.fi-ac-action:focus))]:focus-within:ring-2 ring-gray-950/10 dark:ring-white/20 [&:not(:has(.fi-ac-action:focus))]:focus-within:ring-primary-600 dark:[&:not(:has(.fi-ac-action:focus))]:focus-within:ring-primary-500 fi-fo-select">
+    <div class="min-w-0 flex-1">
+        <div class="choices" data-type="select-one" tabindex="0" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="false">
+            <div class="choices__inner">
+                <select x-ref="input" class="h-9 w-full rounded-lg border-none bg-transparent !bg-none choices__input" id="data.category_id" hidden="" tabindex="-1" data-choice="active"></select>
+                <div class="choices__list choices__list--single">
+                    <div class="choices__placeholder choices__item">Chọn một tùy chọn</div>
+                </div>
+            </div>
+            <div class="choices__list choices__list--dropdown" aria-expanded="false">
+                <input type="search" name="search_terms" class="choices__input choices__input--cloned" autocomplete="off" autocapitalize="off" spellcheck="false" role="textbox" aria-autocomplete="list" aria-label="Select an option" placeholder="Bắt đầu gõ để tìm kiếm..." oninput="filterOptions()">
+                <div class="choices__list" role="listbox" id="options-list">
+                    @foreach($getRecord()->{$getViewData()->get('relationshipName')}->all()->pluck($getViewData()->get('relationshipTitleName'), 'id') as $id => $name)
+                        <div id="choices--datacategory_id-item-choice-{{ $id }}" class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice="" data-id="{{ $id }}" data-value="{{ $id }}" data-choice-selectable="" aria-selected="false">
+                            {{ $name }}
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterOptions() {
+        const input = document.querySelector('input[name="search_terms"]');
+        const filter = input.value.toLowerCase();
+        const options = document.querySelectorAll('#options-list .choices__item');
+
+        options.forEach(option => {
+            const text = option.innerText.toLowerCase();
+            option.style.display = text.includes(filter) ? '' : 'none';
+        });
+    }
+
+    document.addEventListener('click', function(event) {
+        const dropdownBtn = document.querySelector('.choices');
+        const dropdown = document.querySelector('.choices__list--dropdown');
+        const button = document.querySelector('.fi-input-wrp');
+
+        if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+            dropdown.classList.add('is-active');
+            dropdownBtn.classList.add('is-open is-focus');
+        } else {
+            dropdown.classList.remove('is-active');
+            dropdownBtn.classList.remove('is-open is-focus');
+        }
+    });
+</script>
+```
